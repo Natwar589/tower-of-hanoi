@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import TowerGroup from "./components/TowerGroup";
+import TowerGroup from "./components/TowerGroup.jsx";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
 
