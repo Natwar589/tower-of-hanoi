@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const TowerGroup = () => {
+const Tower= () => {
   const maxDiscCount = 10;
   const [discCount, setDiscCount] = useState(3);
   const [towers, setTowers] = useState({
@@ -99,4 +99,4 @@ const TowerGroup = () => {
   );
 };
 
-export default TowerGroup;
+export default Tower;

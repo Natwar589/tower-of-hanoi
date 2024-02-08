@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import TowerGroup from "./components/TowerGroup.jsx";
+import Tower from "./components/Tower.jsx";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
 
@@ -10,7 +10,7 @@ class App extends Component {
         <header className="App-header">
         <div className="t">Tower of Hanoi</div>
          
-          <TowerGroup />
+          <Tower/>
         </header>
       </div>
     );
