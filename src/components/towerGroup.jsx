@@ -1,136 +1,102 @@
-import React from "react";
-import Tower from "./tower";
-import Button from "./button";
+import React, { useState, useEffect } from 'react';
 
-class TowerGroup extends React.Component {
-  constructor(props) {
-    // debugger;
-    super(props);
-    this.state = {
-      towers: {
-        a: [1,2,3,4,5,6],
-        b: [],
-        c: []
-      },
-      moves: []
-    };
-    this.solutionMoves(this.getMaxDiscWidth(), "a", "c", "b");
-  }
+const TowerGroup = () => {
+  const maxDiscCount = 10;
+  const [discCount, setDiscCount] = useState(3);
+  const [towers, setTowers] = useState({
+    A: Array.from({ length: discCount }, (_, index) => discCount - index),
+    B: [],
+    C: [],
+  });
+  const [moves, setMoves] = useState([]);
+  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
 
-  styles = {
-    fontWeight: "bold",
-    fontSize: "20px",
-    padding: "1em",
-    textAlign: "center",
-    backgroundColor: "#CDDC39"
-  };
-  
-  getMaxDiscWidth() {
-    // Create a single list of all disk sizes
-    var sizes = [];
-    Object.keys(this.state.towers).map(
-      tower => (sizes = sizes.concat(this.state.towers[tower]))
-    );
-    return sizes.reduce(function(prev, current) {
-      return prev > current ? prev : current;
+  useEffect(() => {
+    setTowers({
+      A: Array.from({ length: discCount }, (_, index) => discCount - index),
+      B: [],
+      C: [],
     });
-  }
+    setMoves([]);
+    setCurrentMoveIndex(0);
+  }, [discCount]);
 
-
-  getSumDisksHeight() {
-    var sizes = [];
-    // Create a single list of all disk sizes
-    Object.keys(this.state.towers).map(
-      tower => (sizes = sizes.concat(this.state.towers[tower]))
-    );
-    return sizes.length ? sizes.length : 0;
-  }
-
-
-  render() {
-    
-   const updateArrayForTowerA = (newArray) => {
-      this.setState({
-        towers: {
-          ...this.state.towers,  // Keep the other towers unchanged
-          a: newArray
-        }
-      });
-    };
-
-   const updateArray=(event)=>{
-
-     
-
-      const newvalues = event.target.value;
-      console.log(newvalues);
-      
-        const newArr = [];
-      // Add numbers from 1 to 'n' to the array 'a'
-      for (let i = 1; i <= newvalues; i++) {
-        newArr.concat(newArr => [...newArr, i]);
-
-      }
-      this.updateArrayForTowerA(newArr);
-      console.log(newArr);
-      // this.state.towers.a.append(newArr);
-  
-   };
-    return (
-      
-      <div id="game">
-
-      <input
-        type="text"
-        placeholder="Enter a value"
-        onChange={updateArray}
-      />
-     { console.log(this.state.towers.a)}
-        <div id="towers" className="container" style={this.styles}>
-          {Object.keys(this.state.towers).map(tower => (
-            <Tower
-              key={tower}
-              disks={this.state.towers[tower]}
-              maxDiscWidth={this.getMaxDiscWidth()}
-              sumDisksHeight={this.getSumDisksHeight()}
-            />
-          ))}
-        </div>
-        {this.renderButton()}
-      </div>
-    );
-  }
-
-  renderButton() {
-    return <Button onClick={() => this.handleClick()} />;
-  }
-
-  async handleClick() {
-    var nextMove;
-    while ((nextMove = this.state.moves.pop())) {
-      await this.sleep(100);
-      console.log(nextMove);
-      var disk = this.state.towers[nextMove[0]].shift();
-      console.log(disk);
-      this.state.towers[nextMove[1]].unshift(disk);
-      this.setState({ towers: this.state.towers });
-    }
-  }
-
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve,ms));
-  }
-
-  solutionMoves(n, from, to, aux) {
+  const solutionMoves = (n, from, to, aux) => {
     if (n === 1) {
-      this.state.moves.unshift([from, to]);
+      setMoves((prevMoves) => [...prevMoves, { from, to }]);
       return;
-    } else {
-      this.solutionMoves(n - 1, from, aux, to);
-      this.solutionMoves(1, from, to, aux);
-      this.solutionMoves(n - 1, aux, to, from);
     }
-  }
-}
+    solutionMoves(n - 1, from, aux, to);
+    setMoves((prevMoves) => [...prevMoves, { from, to }]);
+    solutionMoves(n - 1, aux, to, from);
+  };
+
+  const handleSolve = () => {
+    setMoves([]);
+    solutionMoves(discCount, 'A', 'C', 'B');
+    setCurrentMoveIndex(0);
+  };
+
+  const handlePrevMove = () => {
+    if (currentMoveIndex > 0) {
+      setCurrentMoveIndex((prevIndex) => prevIndex - 1);
+      moveDisk(moves[currentMoveIndex - 1].to, moves[currentMoveIndex - 1].from);
+    }
+  };
+
+  const handleNextMove = () => {
+    if (currentMoveIndex < moves.length) {
+      moveDisk(moves[currentMoveIndex].from, moves[currentMoveIndex].to);
+      setCurrentMoveIndex((prevIndex) => prevIndex + 1);
+    }
+  };
+
+  const moveDisk = (from, to) => {
+    const updatedTowers = { ...towers };
+    const disk = updatedTowers[from].pop();
+    updatedTowers[to].push(disk);
+    setTowers(updatedTowers);
+  };
+
+  return (
+    <div className="App">
+      <h1>Tower of Hanoi</h1>
+      <div>
+        <label>Number of Discs (up to {maxDiscCount}):</label>
+        <input
+          type="number"
+          value={discCount}
+          onChange={(e) =>
+            setDiscCount(Math.min(maxDiscCount, Math.max(1, parseInt(e.target.value, 10))))
+          }
+          max={maxDiscCount}
+          min="1"
+        />
+      </div>
+      <div id="towers">
+        {Object.keys(towers).map((tower) => (
+          <div key={tower} className="tower-container">
+            <div className="tower">
+              {towers[tower].map((diskSize, index) => (
+                <div key={index} className="disk" style={{ width: `${diskSize * 20}px` }}>
+                  {diskSize}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="controls">
+        <button onClick={handlePrevMove} disabled={currentMoveIndex === 0}>
+          Previous Move
+        </button>
+        <button onClick={handleSolve}>Solve</button>
+        <button onClick={handleNextMove} disabled={currentMoveIndex === moves.length}>
+          Next Move
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default TowerGroup;

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import TowerGroup from "./components/towerGroup";
+import TowerGroup from "./components/TowerGroup";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
 
@@ -8,7 +8,7 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-        <div>Input</div>
+        <div className="t">Tower of Hanoi</div>
          
           <TowerGroup />
         </header>
